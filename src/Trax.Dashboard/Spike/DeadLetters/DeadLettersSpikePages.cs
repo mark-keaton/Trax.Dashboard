@@ -142,16 +142,18 @@ internal static class DeadLettersSpikePages
                               ${Alpine.store('selection').has(id) ? 'checked' : ''} />`);
                   },
                 },
-                { name: 'Id', width: '80px' },
-                { name: 'Manifest', width: '120px' },
-                { name: 'Status', width: '150px',
+                // Grid.js quirk: resizing needs BOTH width AND minWidth, or the handle
+                // highlights but the drag won't take. https://gridjs.io/docs/examples/resizable
+                { name: 'Id', width: '80px', minWidth: '60px' },
+                { name: 'Manifest', width: '120px', minWidth: '90px' },
+                { name: 'Status', width: '150px', minWidth: '110px',
                   formatter: (cell) => gridjs.html(
                     `<span class="badge badge--${String(cell).toLowerCase()}">${cell}</span>`) },
-                { name: 'Dead Lettered At', width: '180px' },
-                { name: 'Reason', width: '260px' },
-                { name: 'Retries', width: '90px' },
-                { name: 'Resolved At', width: '160px' },
-                { name: 'Resolution Note', width: '220px' },
+                { name: 'Dead Lettered At', width: '180px', minWidth: '140px' },
+                { name: 'Reason', width: '260px', minWidth: '160px' },
+                { name: 'Retries', width: '90px', minWidth: '70px' },
+                { name: 'Resolved At', width: '160px', minWidth: '120px' },
+                { name: 'Resolution Note', width: '220px', minWidth: '140px' },
                 { name: '', width: '60px', sort: false,
                   formatter: (_, row) => {
                     const id = row.cells[1].data;
