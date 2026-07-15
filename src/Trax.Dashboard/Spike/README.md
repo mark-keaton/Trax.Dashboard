@@ -1,14 +1,37 @@
 # Phase-2 Spike — htmx + Alpine + Grid.js
 
-Self-contained proof of the Phase-2 patterns from the migration plan, rebuilding **two** dashboard
-pages without Blazor or Radzen:
+Self-contained proof of the Phase-2 patterns from the migration plan, rebuilding dashboard surfaces
+without Blazor or Radzen:
 
-- **Dead Letters** (`Spike/DeadLetters/`) — the first page; proves the pattern end-to-end.
-- **Work Queue** (`Spike/WorkQueue/`) — the second page; proves the pattern **generalizes**.
+- **Dead Letters** (`Spike/DeadLetters/`) — first page; proves the grid pattern end-to-end.
+- **Work Queue** (`Spike/WorkQueue/`) — second page; proves the pattern **generalizes**.
+- **Dialogs** (`Spike/Dialogs/`) — the reflection-driven "Run Train" modal; proves the last
+  genuinely-different surface.
 
 Lives in `Spike/` deliberately: does **not** touch the existing Blazor component tree, and the main
 package compiles (and all tests stay green) with it included. Throwaway proof-of-concept code, not
 production.
+
+## The reflection dialog (Dialogs result)
+
+The Radzen "Run Train" dialog builds a form by reflecting over a train's input `Type`, then reassembles
++ coerces the posted values back into that type. The spike proves this whole mechanism is **pure
+server-side C#** that never needed Blazor — `ReflectionForm.cs` is a near-verbatim port of the Radzen
+`BuildInputFromForm` / `ToJsonNode` / `FormatLabel` / `GetPlaceholder`. htmx just swaps the rendered
+modal fragment; Alpine owns open/close.
+
+Verified round-trip across property kinds (string, int, enum, bool checkbox, nullable DateTime),
+including edge cases: unchecked checkbox → `false`, empty nullable → `null`, enum default → ordinal 0.
+
+**Latent bug found in the existing dashboard.** The Radzen dialog deserializes form values with
+`new JsonSerializerOptions { PropertyNameCaseInsensitive = true }` and **no `JsonStringEnumConverter`**.
+Because the form renders enums as their *name* (e.g. `"Csv"`), running any train whose input has an
+enum property via the **form tab** throws *"The JSON value could not be converted to <Enum>"*. The
+spike registers the converter and works; **the real migration should apply the same fix.**
+
+Faithful-to-original note: an unparseable number (e.g. `RetryCount=notanumber`) surfaces a
+deserialization error toast — same as the Radzen path. A UX opportunity (per-field validation) for the
+real migration, not fixed in the spike.
 
 ## Does it generalize? (Work Queue result)
 
@@ -60,6 +83,7 @@ using Trax.Dashboard.Spike.DeadLetters;
 // ... after AddTrax(...) so IDataContextProviderFactory + ITraxScheduler are registered:
 app.MapDeadLettersSpike();      // serves /trax-spike/dead-letters
 app.MapWorkQueueSpike();        // serves /trax-spike/work-queue
+app.MapDialogSpike();           // serves /trax-spike/dialogs (self-contained; no Trax services needed)
 ```
 
 It needs the same services the real dashboard does (`IDataContextProviderFactory`, `ITraxScheduler`),

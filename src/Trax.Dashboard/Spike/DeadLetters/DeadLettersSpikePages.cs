@@ -310,5 +310,23 @@ internal static class DeadLettersSpikePages
         input.gridjs-search-input::placeholder{color:var(--muted)}
         /* Sort arrows are background-image SVGs tuned for a light bg; lift them in dark mode. */
         [data-theme=dark] .gridjs-sort{filter:invert(0.85)}
+
+        /* --- Dialog spike: modal + reflected form --- */
+        .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;
+          align-items:flex-start;justify-content:center;padding-top:8vh;z-index:40}
+        .modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;
+          width:min(480px,92vw);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+        .modal-head{display:flex;align-items:center;justify-content:space-between;
+          padding:14px 18px;border-bottom:1px solid var(--line);font-size:16px}
+        #modal-body{padding:18px}
+        .modal-type{margin:0 0 14px;color:var(--muted);font-size:13px}
+        .modal .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+        .modal .field label{font-size:13px;font-weight:600;color:var(--ink-2,var(--muted))}
+        .modal .field label.check{flex-direction:row;align-items:center;gap:8px;font-weight:500}
+        .modal .field input[type=text],.modal .field select{padding:8px 10px;border:1px solid var(--line);
+          border-radius:7px;background:var(--bg);color:var(--ink);font-size:14px}
+        .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+        .result-json{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
+          padding:14px;overflow-x:auto;font-family:ui-monospace,monospace;font-size:13px;color:var(--ink)}
         """;
 }
