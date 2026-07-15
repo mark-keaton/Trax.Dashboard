@@ -279,6 +279,33 @@ internal static class DeadLettersSpikePages
           border:1px solid var(--line);border-radius:10px;padding:20px;max-width:720px}
         .detail dt{color:var(--muted);font-weight:600}
         .detail dd{margin:0}
-        .gridjs-wrapper,.gridjs-table{background:var(--card)!important}
+
+        /* --- Grid.js theming ---
+           Grid.js ships a hardcoded light theme (mermaid.min.css) with no CSS variables, so its
+           table stays white in dark mode unless we override its classes. We re-point them at the
+           same theme tokens the rest of the page uses. (A real finding from the spike: a client-side
+           grid widget forces you to theme over its baked-in styles — noted in the plan's Grid.js risk.) */
+           NOTE ON SPECIFICITY: Grid.js targets cells as `td.gridjs-td` / `th.gridjs-th` (element+class)
+           and sets `background-color`, so a flat `.gridjs-td{background:...}` loses. We match its
+           selector shape and property exactly so the override actually wins. */
+        .gridjs-container{color:var(--ink)}
+        .gridjs-wrapper{background:var(--card);box-shadow:none;border:1px solid var(--line)}
+        .gridjs-table{background:var(--card)}
+        table.gridjs-table th.gridjs-th{background-color:var(--bg);color:var(--muted);border-color:var(--line)}
+        table.gridjs-table th.gridjs-th-sort:hover,
+        table.gridjs-table th.gridjs-th-sort:focus{background-color:var(--line)}
+        .gridjs-th-content{color:var(--muted)}
+        .gridjs-tbody,table.gridjs-table td.gridjs-td{background-color:var(--card);color:var(--ink);border-color:var(--line)}
+        table.gridjs-table tr.gridjs-tr:hover td.gridjs-td{background-color:var(--bg)}
+        table.gridjs-table tr.gridjs-tr-selected td.gridjs-td{background-color:var(--warn-bg)}
+        .gridjs-footer{background-color:var(--card);border-color:var(--line);box-shadow:none}
+        .gridjs-pagination,.gridjs-summary{color:var(--muted)}
+        .gridjs-pagination .gridjs-pages button{background-color:var(--card);color:var(--ink);border-color:var(--line)}
+        .gridjs-pagination .gridjs-pages button:hover{background-color:var(--bg)}
+        .gridjs-pagination .gridjs-pages button.gridjs-currentPage{background-color:var(--bg);font-weight:700}
+        input.gridjs-input,input.gridjs-search-input{background-color:var(--card);color:var(--ink);border-color:var(--line)}
+        input.gridjs-search-input::placeholder{color:var(--muted)}
+        /* Sort arrows are background-image SVGs tuned for a light bg; lift them in dark mode. */
+        [data-theme=dark] .gridjs-sort{filter:invert(0.85)}
         """;
 }
