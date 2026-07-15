@@ -187,6 +187,7 @@ internal static class DeadLettersSpikePages
               search: { server: {
                 url: (prev, keyword) => `${prev}${prev.includes('?') ? '&' : '?'}search=${encodeURIComponent(keyword)}`,
               } },
+              resizable: true, // parity: the Radzen TraxDataGrid sets AllowColumnResize="true"
               className: { table: 'trax-grid' },
             });
             grid.render(document.getElementById('grid'));
