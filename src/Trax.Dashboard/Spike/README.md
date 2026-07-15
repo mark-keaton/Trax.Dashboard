@@ -5,8 +5,8 @@ without Blazor or Radzen:
 
 - **Dead Letters** (`Spike/DeadLetters/`) — first page; proves the grid pattern end-to-end.
 - **Work Queue** (`Spike/WorkQueue/`) — second page; proves the pattern **generalizes**.
-- **Dialogs** (`Spike/Dialogs/`) — the reflection-driven "Run Train" modal; proves the last
-  genuinely-different surface.
+- **Dialogs** (`Spike/Dialogs/`) — the reflection-driven "Run Train" modal.
+- **Home** (`Spike/Home/`) — KPI tiles + the four charts as **server-side SVG** (no client chart lib).
 
 Lives in `Spike/` deliberately: does **not** touch the existing Blazor component tree, and the main
 package compiles (and all tests stay green) with it included. Throwaway proof-of-concept code, not
@@ -32,6 +32,27 @@ spike registers the converter and works; **the real migration should apply the s
 Faithful-to-original note: an unparseable number (e.g. `RetryCount=notanumber`) surfaces a
 deserialization error toast — same as the Radzen path. A UX opportunity (per-field validation) for the
 real migration, not fixed in the spike.
+
+## Server-side SVG charts (Home result)
+
+The home page was the last hard surface — Radzen renders its charts client-side. `SvgCharts.cs`
+renders the same three shapes as **inline SVG computed in C#** (same approach the DAG already uses),
+straight from the existing `ChartModels`:
+
+- **Grouped columns** — Executions (Completed/Failed/Cancelled over time).
+- **Horizontal bars** — Avg Duration and Top Failures.
+- **Multi-series line** — Throughput.
+
+Plus the 8 stat/KPI tiles. **No client chart library.** Verified with a real browser render (see
+`scratchpad/home-final.png`): all four charts render legibly, axes/gridlines/legends correct, geometry
+in-bounds. Theme-aware — axis/grid/label colors use the shared CSS tokens, so the same SVG works in
+light and dark without a re-render; series colors keep parity with the Radzen page (status semantics,
+legend-labeled so identity is never color-alone).
+
+**Tradeoff (the reason this is worth calling out):** server SVG has no built-in hover tooltips the way
+Radzen charts do. `<title>` elements give native browser tooltips on bars, but rich crosshair/legend
+hover would need a little client JS. For a monitoring dashboard the static charts + tiles read fine;
+add hover only where the current UI relies on it.
 
 ## Does it generalize? (Work Queue result)
 
@@ -84,6 +105,7 @@ using Trax.Dashboard.Spike.DeadLetters;
 app.MapDeadLettersSpike();      // serves /trax-spike/dead-letters
 app.MapWorkQueueSpike();        // serves /trax-spike/work-queue
 app.MapDialogSpike();           // serves /trax-spike/dialogs (self-contained; no Trax services needed)
+app.MapHomeSpike(() => metrics);// serves /trax-spike/home  (pass an IOperationsService snapshot)
 ```
 
 It needs the same services the real dashboard does (`IDataContextProviderFactory`, `ITraxScheduler`),

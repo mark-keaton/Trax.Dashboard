@@ -328,5 +328,24 @@ internal static class DeadLettersSpikePages
         .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
         .result-json{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;
           padding:14px;overflow-x:auto;font-family:ui-monospace,monospace;font-size:13px;color:var(--ink)}
+
+        /* --- Home spike: tiles, KPI cards, and server-side SVG charts --- */
+        .tilerow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+        .tile{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;
+          text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+        .tile-val{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+        .tile-lbl{font-size:12px;color:var(--muted);margin-top:4px}
+        .chartgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+        .chartcard{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+        .chartcard h3{margin:0 0 10px;font-size:15px}
+        /* SVG charts are theme-aware: axis/grid/labels use ink/line tokens, not baked-in colors. */
+        .svgchart{width:100%;height:auto;display:block}
+        .svgchart .grid{stroke:var(--line);stroke-width:1;shape-rendering:crispEdges}
+        .svgchart .axis{stroke:var(--line-2);stroke-width:1}
+        .svgchart .axis-lbl{fill:var(--muted);font-size:11px;font-family:ui-monospace,monospace}
+        @media (max-width:820px){
+          .tilerow{grid-template-columns:repeat(2,1fr)}
+          .chartgrid{grid-template-columns:1fr}
+        }
         """;
 }
