@@ -227,10 +227,10 @@ internal static class DeadLettersSpikePages
             <dt>Manifest Id</dt><dd>{{d.ManifestId}}</dd>
             <dt>Status</dt><dd><span class="badge badge--{{d.Status.ToString().ToLowerInvariant()}}">{{d.Status}}</span></dd>
             <dt>Dead Lettered At</dt><dd>{{d.DeadLetteredAt:yyyy-MM-dd HH:mm:ss}}</dd>
-            <dt>Reason</dt><dd>{{DeadLettersSpikeEndpoints.Escape(d.Reason)}}</dd>
+            <dt>Reason</dt><dd>{{SpikeHtmx.Escape(d.Reason)}}</dd>
             <dt>Retry Count</dt><dd>{{d.RetryCountAtDeadLetter}}</dd>
             <dt>Resolved At</dt><dd>{{(d.ResolvedAt?.ToString("yyyy-MM-dd HH:mm:ss") ?? "—")}}</dd>
-            <dt>Resolution Note</dt><dd>{{DeadLettersSpikeEndpoints.Escape(d.ResolutionNote)}}</dd>
+            <dt>Resolution Note</dt><dd>{{SpikeHtmx.Escape(d.ResolutionNote)}}</dd>
           </dl>
         </body>
         </html>

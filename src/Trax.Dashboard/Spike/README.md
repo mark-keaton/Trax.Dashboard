@@ -1,11 +1,34 @@
-# Phase-2 Spike — Dead Letters on htmx + Alpine + Grid.js
+# Phase-2 Spike — htmx + Alpine + Grid.js
 
-A self-contained proof of the Phase-2 patterns from the htmx migration plan, rebuilding the
-**Dead Letters** page without Blazor or Radzen. It lives in `Spike/` deliberately: it does **not**
-touch the existing Blazor component tree, and the main package compiles with it included.
+Self-contained proof of the Phase-2 patterns from the migration plan, rebuilding **two** dashboard
+pages without Blazor or Radzen:
 
-This is throwaway proof-of-concept code, not production. It exists to de-risk the two hardest
-Phase-2 concerns before committing all 18 routes.
+- **Dead Letters** (`Spike/DeadLetters/`) — the first page; proves the pattern end-to-end.
+- **Work Queue** (`Spike/WorkQueue/`) — the second page; proves the pattern **generalizes**.
+
+Lives in `Spike/` deliberately: does **not** touch the existing Blazor component tree, and the main
+package compiles (and all tests stay green) with it included. Throwaway proof-of-concept code, not
+production.
+
+## Does it generalize? (Work Queue result)
+
+Building the second page was the real test. Findings:
+
+- **Shared with zero change:** the Alpine `selection`/`theme` stores, the polling live-count pill,
+  the toast + `HX-Trigger` convention (extracted to `SpikeHtmx.cs` when the 2nd page needed it),
+  the Grid.js server-config shape (data/sort/paging/search/resize), and all the CSS/theming.
+- **Page-specific (the only per-page work):** the column list, the title/lede, the live-count label,
+  and the batch action(s). That's it.
+- **The pattern held under a different action mechanism.** Dead Letters' batch ops go through
+  `ITraxScheduler`; Work Queue's Cancel runs `ExecuteUpdateAsync` **directly on the IDataContext**,
+  with a "only Queued entries cancellable" guard. Same template accommodated both — the toast/trigger
+  contract didn't care what the action did underneath.
+- **One collision to note:** the entity `WorkQueue` and a `Spike.WorkQueue` namespace segment
+  clashed; renamed the namespace to `Spike.WorkQueuePage`. Trivial, but real — worth a naming
+  convention for the other 16 pages.
+
+Conclusion: **the template is reusable, not Dead-Letters-specific.** A new data page is ~1 endpoints
+file + ~1 page file, mostly the column list.
 
 ## What it proves
 
@@ -36,6 +59,7 @@ verified by inspection of the emitted attributes rather than a live render).
 using Trax.Dashboard.Spike.DeadLetters;
 // ... after AddTrax(...) so IDataContextProviderFactory + ITraxScheduler are registered:
 app.MapDeadLettersSpike();      // serves /trax-spike/dead-letters
+app.MapWorkQueueSpike();        // serves /trax-spike/work-queue
 ```
 
 It needs the same services the real dashboard does (`IDataContextProviderFactory`, `ITraxScheduler`),

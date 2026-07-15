@@ -195,7 +195,7 @@ internal static class DeadLettersSpikeEndpoints
     )
     {
         var ids = await ReadIdsAsync(ctx, ct);
-        if (ids.Length == 0) return ToastResult(false, "Requeue", "No rows selected.");
+        if (ids.Length == 0) return SpikeHtmx.Toast(false, "Requeue", "No rows selected.", trigger: null);
         return await RunBatch(() => scheduler.RequeueDeadLettersAsync(ids, ct), "Requeue");
     }
 
@@ -214,7 +214,7 @@ internal static class DeadLettersSpikeEndpoints
         var form = await ctx.Request.ReadFormAsync(ct);
         var note = form["note"].ToString();
         var ids = ParseIds(form["ids"].ToString());
-        if (ids.Length == 0) return ToastResult(false, "Acknowledge", "No rows selected.");
+        if (ids.Length == 0) return SpikeHtmx.Toast(false, "Acknowledge", "No rows selected.", trigger: null);
         return await RunBatch(() => scheduler.AcknowledgeDeadLettersAsync(ids, note, ct), "Acknowledge");
     }
 
@@ -223,27 +223,12 @@ internal static class DeadLettersSpikeEndpoints
         try
         {
             var result = await op();
-            return ToastResult(true, label, result.Message);
+            return SpikeHtmx.Toast(true, label, result.Message, trigger: "deadletters:changed");
         }
         catch (Exception ex)
         {
-            return ToastResult(false, label, ex.Message);
+            return SpikeHtmx.Toast(false, label, ex.Message, trigger: null);
         }
-    }
-
-    // The batch response is an OOB toast PLUS an HX-Trigger header that tells the grid to reload.
-    private static IResult ToastResult(bool ok, string label, string message)
-    {
-        var kind = ok ? "toast--ok" : "toast--err";
-        // Not an interpolated string: the Alpine x-data="{show:true}" braces must stay literal.
-        var html =
-            "<div id=\"toast-slot\" hx-swap-oob=\"innerHTML\">" +
-            "  <div class=\"toast " + kind + "\" x-data=\"{show:true}\" x-show=\"show\"" +
-            "       x-init=\"setTimeout(() => show=false, 4000)\">" +
-            "    <strong>" + Escape(label) + "</strong> " + Escape(message) +
-            "  </div>" +
-            "</div>";
-        return Results.Extensions.HtmlWithTrigger(html, ok ? "deadletters:changed" : "");
     }
 
     // ---- helpers -------------------------------------------------------------------------------
@@ -268,9 +253,6 @@ internal static class DeadLettersSpikeEndpoints
 
     private static int ParseInt(string? raw, int fallback, int min, int max) =>
         int.TryParse(raw, out var v) ? Math.Clamp(v, min, max) : fallback;
-
-    internal static string Escape(string? s) =>
-        System.Net.WebUtility.HtmlEncode(s ?? string.Empty);
 }
 
 /// <summary>Flat DTO shaped for the Grid.js columns. Kept separate from the EF entity on purpose.</summary>
